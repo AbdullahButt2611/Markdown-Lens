@@ -1,4 +1,4 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import type { MarkdownFile } from './types/markdown'
 import { useFileUpload } from './hooks/useFileUpload'
 import { useTheme } from './hooks/useTheme'
@@ -6,6 +6,7 @@ import { appendFiles } from './lib/file'
 import { createId } from './lib/ids'
 import { EmptyState } from './components/ui/EmptyState'
 import { Sidebar } from './components/layout/Sidebar'
+import { MobileBar } from './components/layout/MobileBar'
 import { ReadingPane } from './components/layout/ReadingPane'
 import { UploadErrors } from './components/upload/UploadErrors'
 
@@ -14,8 +15,21 @@ function App() {
   // active. Nothing is persisted — a refresh clears everything by design.
   const [files, setFiles] = useState<MarkdownFile[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const { errors, dismissError, readFiles } = useFileUpload()
   const { theme, toggleTheme } = useTheme()
+
+  const closeSidebar = useCallback(() => setSidebarOpen(false), [])
+
+  // Escape closes the mobile drawer.
+  useEffect(() => {
+    if (!sidebarOpen) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setSidebarOpen(false)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [sidebarOpen])
 
   const handleFiles = useCallback(
     async (input: File[]) => {
@@ -35,6 +49,11 @@ function App() {
     },
     [readFiles],
   )
+
+  const handleSelect = useCallback((id: string) => {
+    setActiveId(id)
+    setSidebarOpen(false) // dismiss the drawer after picking a file on mobile
+  }, [])
 
   const handleRemove = useCallback(
     (id: string) => {
@@ -67,32 +86,54 @@ function App() {
   }
 
   return (
-    <div className="flex min-h-screen bg-[color:var(--color-bg)] text-[color:var(--color-fg)]">
+    <div className="flex h-screen overflow-hidden bg-[color:var(--color-bg)] text-[color:var(--color-fg)]">
+      {/* Mobile drawer backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 z-30 bg-black/40 md:hidden"
+          aria-hidden="true"
+          onClick={closeSidebar}
+        />
+      )}
+
       <Sidebar
         files={files}
         activeId={activeId}
-        onSelect={setActiveId}
+        onSelect={handleSelect}
         onRemove={handleRemove}
         onFiles={handleFiles}
         theme={theme}
         onToggleTheme={toggleTheme}
+        onClose={closeSidebar}
+        className={`fixed inset-y-0 left-0 z-40 transform transition-transform md:static md:z-auto md:translate-x-0 ${
+          sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
       />
-      <main className="relative flex-1">
-        {errors.length > 0 && (
-          <UploadErrors
-            errors={errors}
-            onDismiss={dismissError}
-            className="absolute right-4 top-4 z-10 max-w-sm"
-          />
-        )}
-        {activeFile ? (
-          <ReadingPane file={activeFile} />
-        ) : (
-          <div className="flex h-screen items-center justify-center text-[color:var(--color-fg-muted)]">
-            Select a file to read.
-          </div>
-        )}
-      </main>
+
+      <div className="flex min-h-0 flex-1 flex-col">
+        <MobileBar
+          activeName={activeFile?.name ?? null}
+          onOpenSidebar={() => setSidebarOpen(true)}
+          theme={theme}
+          onToggleTheme={toggleTheme}
+        />
+        <main className="relative min-h-0 flex-1">
+          {errors.length > 0 && (
+            <UploadErrors
+              errors={errors}
+              onDismiss={dismissError}
+              className="absolute right-4 top-4 z-10 max-w-sm"
+            />
+          )}
+          {activeFile ? (
+            <ReadingPane file={activeFile} />
+          ) : (
+            <div className="flex flex-1 items-center justify-center py-24 text-[color:var(--color-fg-muted)]">
+              Select a file to read.
+            </div>
+          )}
+        </main>
+      </div>
     </div>
   )
 }
