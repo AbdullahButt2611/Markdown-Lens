@@ -1,7 +1,9 @@
 import { Plus } from 'lucide-react'
 import type { MarkdownFile } from '../../types/markdown'
+import type { Theme } from '../../hooks/useTheme'
 import { openFileDialog } from '../../lib/filePicker'
 import { Button } from '../ui/Button'
+import { ThemeToggle } from '../ui/ThemeToggle'
 import { FileTab } from '../upload/FileTab'
 
 interface SidebarProps {
@@ -10,6 +12,8 @@ interface SidebarProps {
   onSelect: (id: string) => void
   onRemove: (id: string) => void
   onFiles: (files: File[]) => void
+  theme: Theme
+  onToggleTheme: () => void
 }
 
 /**
@@ -22,13 +26,16 @@ export function Sidebar({
   onSelect,
   onRemove,
   onFiles,
+  theme,
+  onToggleTheme,
 }: SidebarProps) {
   return (
     <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-[color:var(--color-border)] bg-[color:var(--color-surface)]">
-      <div className="flex items-center gap-2 px-4 py-4">
+      <div className="flex items-center justify-between px-4 py-4">
         <span className="font-display text-lg font-bold tracking-tight">
           Markdown Lens
         </span>
+        <ThemeToggle theme={theme} onToggle={onToggleTheme} />
       </div>
 
       <nav
