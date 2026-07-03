@@ -51,7 +51,7 @@ export function useFileUpload(): UseFileUpload {
         newErrors.push({
           id: createId(),
           fileName: file.name,
-          message: `Couldn't read "${file.name}". The file may be corrupted — try re-selecting it.`,
+          message: `Couldn't read "${file.name}". The file may be corrupted; try re-selecting it.`,
         })
       }
     }
