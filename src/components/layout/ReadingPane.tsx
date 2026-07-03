@@ -11,7 +11,7 @@ interface ReadingPaneProps {
  */
 export function ReadingPane({ file }: ReadingPaneProps) {
   return (
-    <div className="h-screen flex-1 overflow-y-auto">
+    <div className="h-full overflow-y-auto">
       <article className="mx-auto max-w-3xl px-6 py-12 sm:px-10">
         <MarkdownRenderer content={file.content} />
       </article>

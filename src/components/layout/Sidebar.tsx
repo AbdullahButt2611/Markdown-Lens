@@ -1,8 +1,9 @@
-import { Plus } from 'lucide-react'
+import { Plus, X } from 'lucide-react'
 import type { MarkdownFile } from '../../types/markdown'
 import type { Theme } from '../../hooks/useTheme'
 import { openFileDialog } from '../../lib/filePicker'
 import { Button } from '../ui/Button'
+import { IconButton } from '../ui/IconButton'
 import { ThemeToggle } from '../ui/ThemeToggle'
 import { FileTab } from '../upload/FileTab'
 
@@ -14,6 +15,10 @@ interface SidebarProps {
   onFiles: (files: File[]) => void
   theme: Theme
   onToggleTheme: () => void
+  /** Positioning/visibility classes supplied by the layout (drawer vs docked). */
+  className?: string
+  /** Close the mobile drawer; absent on desktop. */
+  onClose?: () => void
 }
 
 /**
@@ -28,14 +33,29 @@ export function Sidebar({
   onFiles,
   theme,
   onToggleTheme,
+  className = '',
+  onClose,
 }: SidebarProps) {
   return (
-    <aside className="flex h-screen w-64 shrink-0 flex-col border-r border-[color:var(--color-border)] bg-[color:var(--color-surface)]">
-      <div className="flex items-center justify-between px-4 py-4">
+    <aside
+      className={`flex h-screen w-64 shrink-0 flex-col border-r border-[color:var(--color-border)] bg-[color:var(--color-surface)] ${className}`}
+    >
+      <div className="flex items-center justify-between gap-2 px-4 py-4">
         <span className="font-display text-lg font-bold tracking-tight">
           Markdown Lens
         </span>
-        <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+        <div className="flex items-center gap-1">
+          <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+          {onClose && (
+            <IconButton
+              aria-label="Close file list"
+              onClick={onClose}
+              className="md:hidden"
+            >
+              <X size={18} aria-hidden="true" />
+            </IconButton>
+          )}
+        </div>
       </div>
 
       <nav
