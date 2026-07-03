@@ -1,6 +1,7 @@
 import { useCallback, useState } from 'react'
 import type { MarkdownFile } from './types/markdown'
 import { useFileUpload } from './hooks/useFileUpload'
+import { useTheme } from './hooks/useTheme'
 import { appendFiles } from './lib/file'
 import { createId } from './lib/ids'
 import { EmptyState } from './components/ui/EmptyState'
@@ -14,6 +15,7 @@ function App() {
   const [files, setFiles] = useState<MarkdownFile[]>([])
   const [activeId, setActiveId] = useState<string | null>(null)
   const { errors, dismissError, readFiles } = useFileUpload()
+  const { theme, toggleTheme } = useTheme()
 
   const handleFiles = useCallback(
     async (input: File[]) => {
@@ -57,6 +59,8 @@ function App() {
           onFiles={handleFiles}
           errors={errors}
           onDismissError={dismissError}
+          theme={theme}
+          onToggleTheme={toggleTheme}
         />
       </main>
     )
@@ -70,6 +74,8 @@ function App() {
         onSelect={setActiveId}
         onRemove={handleRemove}
         onFiles={handleFiles}
+        theme={theme}
+        onToggleTheme={toggleTheme}
       />
       <main className="relative flex-1">
         {errors.length > 0 && (

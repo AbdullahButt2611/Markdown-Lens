@@ -84,4 +84,14 @@
   .prose-doc :where(code):not(pre code)::after {
     content: none;
   }
+
+  /**
+   * The highlight.js theme (atom-one-dark) sets its own background and padding
+   * on `.hljs`. Neutralize both so the CodeBlock owns layout and background via
+   * the --color-code-* tokens; keep the theme's token colors.
+   */
+  .hljs {
+    background: transparent !important;
+    padding: 0 !important;
+  }
 }
