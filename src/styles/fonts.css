@@ -1,0 +1,14 @@
+/**
+ * Self-hosted display face. Lastik ships a single static weight; we map it
+ * across the 400–700 range so headings at 600 use the real file rather than a
+ * synthesized faux-bold. Body (Poppins) is bundled via @fontsource in main.tsx.
+ */
+@font-face {
+  font-family: 'Lastik';
+  src:
+    url('../assets/fonts/Lastik-Regular.woff2') format('woff2'),
+    url('../assets/fonts/Lastik-Regular.woff') format('woff');
+  font-weight: 400 700;
+  font-style: normal;
+  font-display: swap;
+}
