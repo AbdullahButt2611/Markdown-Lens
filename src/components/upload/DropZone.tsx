@@ -58,10 +58,10 @@ export function DropZone({ onFiles, children, className = '' }: DropZoneProps) {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
-      className={`cursor-pointer rounded-2xl border-2 border-dashed transition-colors ${
+      className={`cursor-pointer rounded-[20px] border-2 border-dashed bg-[color:var(--color-surface)] transition-colors ${
         isDragging
           ? 'border-[color:var(--color-accent)] bg-[color:var(--color-surface-muted)]'
-          : 'border-[color:var(--color-border)] hover:border-[color:var(--color-accent)]'
+          : 'border-[color:var(--color-border)] hover:border-[color:var(--color-accent)] hover:bg-[color:var(--color-surface-muted)]'
       } ${className}`}
     >
       {children}
