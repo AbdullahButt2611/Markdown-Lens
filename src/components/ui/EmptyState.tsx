@@ -52,7 +52,7 @@ export function EmptyState({
 
           <div className="text-center">
             <h1 className="font-display text-[34px] font-bold leading-[1.12] tracking-[-0.022em]">
-              Read your Markdown, beautifully
+              Read Your Markdown, Beautifully
             </h1>
             <p className="mx-auto mt-3.5 max-w-[440px] text-[14.5px] leading-[1.62] text-[color:var(--color-fg-muted)]">
               Drop in your{' '}
@@ -71,14 +71,14 @@ export function EmptyState({
               </span>
               <div>
                 <p className="font-display text-[20px] font-semibold">
-                  Drop Markdown files here
+                  Drop Markdown Files Here
                 </p>
                 <p className="mt-2 text-[12.5px] text-[color:var(--color-fg-faint)]">
-                  or{' '}
+                  Or{' '}
                   <span className="font-semibold text-[color:var(--color-accent)]">
-                    browse
+                    Browse
                   </span>{' '}
-                  · .md, .markdown, .txt · up to 5 MB each
+                  · .md, .markdown, .txt · Up To 5 MB Each
                 </p>
               </div>
             </div>
@@ -117,8 +117,8 @@ export function EmptyState({
           className="shrink-0 text-[color:var(--color-fg-faint)]"
         />
         <span className="text-[11.5px] text-[color:var(--color-fg-faint)]">
-          In-memory only · your files never leave the browser, and there's
-          nothing to save
+          In-Memory Only · Your Files Never Leave The Browser, And There's
+          Nothing To Save
         </span>
       </div>
     </div>

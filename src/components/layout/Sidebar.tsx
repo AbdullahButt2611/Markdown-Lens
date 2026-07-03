@@ -69,12 +69,12 @@ export function Sidebar({
           className="w-full"
         >
           <Plus size={15} strokeWidth={2.2} aria-hidden="true" />
-          Add files
+          Add Files
         </Button>
       </div>
 
       <div className="px-5 py-1.5 text-[10.5px] font-semibold uppercase tracking-[0.09em] text-[color:var(--color-fg-faint)]">
-        Open files
+        Open Files
       </div>
 
       <nav aria-label="Open files" className="flex-1 overflow-y-auto px-2.5 pb-2.5">
@@ -99,7 +99,7 @@ export function Sidebar({
           className="shrink-0 text-[color:var(--color-fg-faint)]"
         />
         <span className="text-[11px] leading-tight text-[color:var(--color-fg-faint)]">
-          In-memory only · nothing leaves your browser
+          In-Memory Only · Nothing Leaves Your Browser
         </span>
       </div>
     </aside>

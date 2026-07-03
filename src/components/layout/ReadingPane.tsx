@@ -32,7 +32,7 @@ export function ReadingPane({ file }: ReadingPaneProps) {
         </span>
         <span className="inline-flex items-center gap-1.5 rounded-full bg-[color:var(--color-accent-soft)] px-[9px] py-[3px] text-[10.5px] font-semibold tracking-[0.02em] text-[color:var(--color-accent)]">
           <Lock size={10} strokeWidth={2.4} aria-hidden="true" />
-          In-memory
+          In-Memory
         </span>
         <span className="flex-1" />
         <span className="text-[11.5px] text-[color:var(--color-fg-faint)]">

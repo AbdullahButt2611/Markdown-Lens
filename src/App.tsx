@@ -129,7 +129,7 @@ function App() {
             <ReadingPane file={activeFile} />
           ) : (
             <div className="flex flex-1 items-center justify-center py-24 text-[color:var(--color-fg-muted)]">
-              Select a file to read.
+              Select A File To Read.
             </div>
           )}
         </main>
