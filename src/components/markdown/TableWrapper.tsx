@@ -10,7 +10,7 @@ interface TableWrapperProps {
  */
 export function TableWrapper({ children }: TableWrapperProps) {
   return (
-    <div className="my-6 overflow-x-auto">
+    <div className="my-[22px] overflow-x-auto rounded-xl border border-[color:var(--color-border)]">
       <table>{children}</table>
     </div>
   )
