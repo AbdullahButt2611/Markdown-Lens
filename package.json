@@ -11,6 +11,8 @@
     "format": "prettier --write ."
   },
   "dependencies": {
+    "@fontsource-variable/ancizar-serif": "^5.2.3",
+    "@fontsource-variable/merriweather": "^5.2.6",
     "@fontsource/poppins": "^5.1.0",
     "highlight.js": "^11.10.0",
     "katex": "^0.16.11",
