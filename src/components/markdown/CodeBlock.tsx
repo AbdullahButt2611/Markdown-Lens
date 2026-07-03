@@ -25,14 +25,14 @@ export function CodeBlock({ language, rawText, children }: CodeBlockProps) {
   return (
     <div className="not-prose my-6 overflow-hidden rounded-xl border border-[color:var(--color-code-border)]">
       <div className="flex items-center justify-between border-b border-[color:var(--color-code-border)] bg-[color:var(--color-code-header-bg)] px-4 py-2">
-        <span className="font-mono text-xs uppercase tracking-wider text-[color:var(--color-code-fg)]/70">
+        <span className="font-mono text-xs font-medium uppercase tracking-wider text-[color:var(--color-code-fg)] opacity-80">
           {language ?? 'text'}
         </span>
         <button
           type="button"
           onClick={() => void copy(rawText)}
           aria-label={copied ? 'Copied' : 'Copy code'}
-          className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-[color:var(--color-code-fg)]/80 transition-colors hover:bg-white/10 hover:text-[color:var(--color-code-fg)]"
+          className="inline-flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-[color:var(--color-code-fg)] transition-colors hover:bg-white/10"
         >
           {copied ? (
             <>
