@@ -1,19 +1,32 @@
 import { FileUp } from 'lucide-react'
 import type { UploadError } from '../../types/markdown'
+import type { Theme } from '../../hooks/useTheme'
 import { ACCEPTED_EXTENSIONS, MAX_FILE_SIZE_LABEL } from '../../lib/file'
 import { DropZone } from '../upload/DropZone'
 import { UploadErrors } from '../upload/UploadErrors'
+import { ThemeToggle } from './ThemeToggle'
 
 interface EmptyStateProps {
   onFiles: (files: File[]) => void
   errors: UploadError[]
   onDismissError: (id: string) => void
+  theme: Theme
+  onToggleTheme: () => void
 }
 
 /** Full-pane invitation shown when no files are open. */
-export function EmptyState({ onFiles, errors, onDismissError }: EmptyStateProps) {
+export function EmptyState({
+  onFiles,
+  errors,
+  onDismissError,
+  theme,
+  onToggleTheme,
+}: EmptyStateProps) {
   return (
-    <div className="mx-auto flex min-h-screen w-full max-w-2xl flex-col items-center justify-center gap-6 px-6 py-16">
+    <div className="relative mx-auto flex min-h-screen w-full max-w-2xl flex-col items-center justify-center gap-6 px-6 py-16">
+      <div className="absolute right-4 top-4">
+        <ThemeToggle theme={theme} onToggle={onToggleTheme} />
+      </div>
       <div className="text-center">
         <h1 className="font-display text-3xl font-bold tracking-tight">
           Markdown Lens
