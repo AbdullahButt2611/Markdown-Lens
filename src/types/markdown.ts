@@ -10,3 +10,13 @@ export interface MarkdownFile {
   /** Raw markdown source. */
   content: string
 }
+
+/** A rejected or failed upload, surfaced inline to the user. */
+export interface UploadError {
+  /** Stable unique id for list rendering / dismissal. */
+  id: string
+  /** The offending file's name, so the message can name it. */
+  fileName: string
+  /** What went wrong and, where useful, how to fix it. */
+  message: string
+}
