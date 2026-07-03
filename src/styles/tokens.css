@@ -1,57 +1,80 @@
 /**
  * Design tokens. Light/dark is a variable swap — never duplicated classes.
- * The `.dark` class is toggled on <html> by useTheme (added in a later phase).
- * Font variables are consumed by Tailwind's fontFamily map (tailwind.config.js);
- * real @font-face declarations for Lastik/Poppins are wired in the fonts step.
+ * The `.dark` class is toggled on <html> by useTheme.
+ * Font variables are consumed by Tailwind's fontFamily map (tailwind.config.js).
+ *
+ * Palette: warm charcoal + coral (Claude-like). Code-block and syntax tokens
+ * are CONSTANT across both themes so code stays dark everywhere.
  */
 
 :root {
   /* Typography roles — reference these, never hard-code family names. */
   --font-display:
-    'Lastik', ui-sans-serif, system-ui, sans-serif;
+    'Merriweather Variable', 'Lastik', ui-serif, Georgia, serif;
   --font-body:
     'Poppins', ui-sans-serif, system-ui, -apple-system, sans-serif;
   --font-mono:
     ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
 
   /* Surfaces & text (light) */
-  --color-bg: #f7f7f5;
+  --color-bg: #faf9f5;
+  --color-sidebar: #f2f0e8;
   --color-surface: #ffffff;
-  --color-surface-muted: #f0efec;
-  --color-fg: #1f1e1c;
-  --color-fg-muted: #6b6a66;
-  --color-border: #e4e2dd;
+  --color-surface-muted: #edeae0;
+  --color-fg: #2b2a26;
+  --color-fg-muted: #6b6a63;
+  --color-fg-faint: #93918a;
+  --color-border: #e7e4da;
 
   /* Accent — spent in one signature place only */
-  --color-accent: #c65f3a;
+  --color-accent: #c15f3c;
   --color-accent-fg: #ffffff;
+  --color-accent-soft: rgba(193, 95, 60, 0.1);
 
   /* Focus ring */
-  --color-focus: #c65f3a;
+  --color-focus: #c15f3c;
 
   /* Code block keeps its own dark theme in BOTH page themes */
-  --color-code-bg: #1e1e2e;
-  --color-code-header-bg: #181825;
-  --color-code-fg: #cdd6f4;
-  --color-code-border: #313244;
+  --color-code-bg: #1c1b19;
+  --color-code-header-bg: #161513;
+  --color-code-fg: #e9e6dd;
+  --color-code-border: #33312c;
+
+  /* Syntax colors (constant across themes) */
+  --color-code-comment: #7d7a70;
+  --color-code-keyword: #e0997a;
+  --color-code-string: #9fb07f;
+  --color-code-number: #d8a657;
+  --color-code-func: #82b3aa;
+  --color-code-punct: #b6b3a9;
 }
 
 .dark {
-  --color-bg: #17161a;
-  --color-surface: #201f24;
-  --color-surface-muted: #26252b;
-  --color-fg: #ecebe8;
-  --color-fg-muted: #a3a19b;
-  --color-border: #333138;
+  --color-bg: #262624;
+  --color-sidebar: #1e1d1b;
+  --color-surface: #30302e;
+  --color-surface-muted: #35342f;
+  --color-fg: #f5f4ee;
+  --color-fg-muted: #b6b3a9;
+  --color-fg-faint: #8a877d;
+  --color-border: #3a3833;
 
-  --color-accent: #e07a54;
-  --color-accent-fg: #17161a;
+  --color-accent: #d97757;
+  --color-accent-fg: #ffffff;
+  --color-accent-soft: rgba(217, 119, 87, 0.14);
 
-  --color-focus: #e07a54;
+  --color-focus: #d97757;
 
-  /* Code theme stays dark and constant across page themes. */
-  --color-code-bg: #1e1e2e;
-  --color-code-header-bg: #181825;
-  --color-code-fg: #cdd6f4;
-  --color-code-border: #313244;
+  /* Code + syntax tokens identical to :root (dark in both themes). */
+  --color-code-bg: #1c1b19;
+  --color-code-header-bg: #161513;
+  --color-code-fg: #e9e6dd;
+  --color-code-border: #33312c;
+
+  --color-code-comment: #7d7a70;
+  --color-code-keyword: #e0997a;
+  --color-code-string: #9fb07f;
+  --color-code-number: #d8a657;
+  --color-code-func: #82b3aa;
+  --color-code-punct: #b6b3a9;
 }
