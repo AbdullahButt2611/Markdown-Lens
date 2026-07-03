@@ -1,0 +1,57 @@
+/**
+ * Design tokens. Light/dark is a variable swap — never duplicated classes.
+ * The `.dark` class is toggled on <html> by useTheme (added in a later phase).
+ * Font variables are consumed by Tailwind's fontFamily map (tailwind.config.js);
+ * real @font-face declarations for Lastik/Poppins are wired in the fonts step.
+ */
+
+:root {
+  /* Typography roles — reference these, never hard-code family names. */
+  --font-display:
+    'Lastik', ui-sans-serif, system-ui, sans-serif;
+  --font-body:
+    'Poppins', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-mono:
+    ui-monospace, 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+
+  /* Surfaces & text (light) */
+  --color-bg: #f7f7f5;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f0efec;
+  --color-fg: #1f1e1c;
+  --color-fg-muted: #6b6a66;
+  --color-border: #e4e2dd;
+
+  /* Accent — spent in one signature place only */
+  --color-accent: #c65f3a;
+  --color-accent-fg: #ffffff;
+
+  /* Focus ring */
+  --color-focus: #c65f3a;
+
+  /* Code block keeps its own dark theme in BOTH page themes */
+  --color-code-bg: #1e1e2e;
+  --color-code-header-bg: #181825;
+  --color-code-fg: #cdd6f4;
+  --color-code-border: #313244;
+}
+
+.dark {
+  --color-bg: #17161a;
+  --color-surface: #201f24;
+  --color-surface-muted: #26252b;
+  --color-fg: #ecebe8;
+  --color-fg-muted: #a3a19b;
+  --color-border: #333138;
+
+  --color-accent: #e07a54;
+  --color-accent-fg: #17161a;
+
+  --color-focus: #e07a54;
+
+  /* Code theme stays dark and constant across page themes. */
+  --color-code-bg: #1e1e2e;
+  --color-code-header-bg: #181825;
+  --color-code-fg: #cdd6f4;
+  --color-code-border: #313244;
+}
