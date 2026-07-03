@@ -6,6 +6,7 @@ import remarkGfm from 'remark-gfm'
 import remarkMath from 'remark-math'
 import rehypeKatex from 'rehype-katex'
 import rehypeHighlight from 'rehype-highlight'
+import { remarkBrToBreak } from '../../lib/remarkBrToBreak'
 import { CodeBlock } from './CodeBlock'
 import { Anchor } from './Anchor'
 import { TableWrapper } from './TableWrapper'
@@ -24,7 +25,7 @@ import { TableWrapper } from './TableWrapper'
  *
  * Defined at module scope so the arrays/map are stable across renders.
  */
-const remarkPlugins: PluggableList = [remarkGfm, remarkMath]
+const remarkPlugins: PluggableList = [remarkGfm, remarkMath, remarkBrToBreak]
 const rehypePlugins: PluggableList = [
   rehypeKatex,
   [rehypeHighlight, { ignoreMissing: true }],
