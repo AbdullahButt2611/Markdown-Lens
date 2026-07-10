@@ -1,0 +1,81 @@
+/**
+ * Warm syntax theme for rehype-highlight (highlight.js) output, mapped to the
+ * constant --color-code-* tokens so the palette matches the design in both page
+ * themes.
+ *
+ * IMPORTANT: this is plain CSS, NOT inside a Tailwind @layer. The `.hljs-*`
+ * class names are produced at runtime by the highlighter and never appear in
+ * source files, so if these rules lived in `@layer components` Tailwind would
+ * tree-shake them out of the production build and code would render colorless.
+ */
+
+.hljs {
+  background: transparent;
+  padding: 0;
+  color: var(--color-code-fg);
+}
+
+.hljs-comment,
+.hljs-quote {
+  color: var(--color-code-comment);
+  font-style: italic;
+}
+
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-literal,
+.hljs-section,
+.hljs-doctag,
+.hljs-name {
+  color: var(--color-code-keyword);
+}
+
+.hljs-string,
+.hljs-regexp,
+.hljs-addition,
+.hljs-meta .hljs-string {
+  color: var(--color-code-string);
+}
+
+.hljs-number,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link {
+  color: var(--color-code-number);
+}
+
+.hljs-title,
+.hljs-title.function_,
+.hljs-title.class_,
+.hljs-type,
+.hljs-built_in,
+.hljs-attr,
+.hljs-attribute,
+.hljs-selector-id,
+.hljs-selector-class {
+  color: var(--color-code-func);
+}
+
+.hljs-variable,
+.hljs-template-variable,
+.hljs-params {
+  color: var(--color-code-fg);
+}
+
+.hljs-punctuation,
+.hljs-operator {
+  color: var(--color-code-punct);
+}
+
+.hljs-meta,
+.hljs-tag {
+  color: var(--color-code-punct);
+}
+
+.hljs-emphasis {
+  font-style: italic;
+}
+
+.hljs-strong {
+  font-weight: 700;
+}

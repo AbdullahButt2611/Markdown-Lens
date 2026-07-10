@@ -7,6 +7,7 @@ import '@fontsource/poppins/600.css'
 import '@fontsource-variable/merriweather/index.css'
 import './styles/fonts.css'
 import 'katex/dist/katex.min.css'
+import './styles/code-theme.css'
 import './styles/index.css'
 
 const rootElement = document.getElementById('root')

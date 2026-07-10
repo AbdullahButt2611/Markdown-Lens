@@ -34,7 +34,10 @@ const remarkPlugins: PluggableList = [
 ]
 const rehypePlugins: PluggableList = [
   rehypeKatex,
-  [rehypeHighlight, { ignoreMissing: true }],
+  // `detect` auto-guesses the language for fences with no language tag, so
+  // untagged code blocks still get syntax colors. `ignoreMissing` keeps an
+  // unknown explicit language from throwing (it just renders unhighlighted).
+  [rehypeHighlight, { detect: true, ignoreMissing: true }],
 ]
 
 /** Flatten a hast subtree to its raw text (for the copy button). */

@@ -182,59 +182,9 @@
   }
 
   /**
-   * Warm syntax theme for rehype-highlight output, mapped to the constant code
-   * tokens. Self-contained (no external highlight.js theme import), so the code
-   * palette matches the design in both page themes.
+   * The syntax theme (.hljs-* rules) is intentionally NOT here. Class names
+   * generated at runtime by rehype-highlight never appear in source, so
+   * Tailwind would tree-shake them out of the production build. It lives in
+   * styles/code-theme.css (plain CSS, imported in main.tsx) instead.
    */
-  .hljs {
-    background: transparent;
-    padding: 0;
-    color: var(--color-code-fg);
-  }
-  .hljs-comment,
-  .hljs-quote {
-    color: var(--color-code-comment);
-    font-style: italic;
-  }
-  .hljs-keyword,
-  .hljs-selector-tag,
-  .hljs-literal,
-  .hljs-section,
-  .hljs-doctag,
-  .hljs-name {
-    color: var(--color-code-keyword);
-  }
-  .hljs-string,
-  .hljs-regexp,
-  .hljs-addition,
-  .hljs-meta .hljs-string {
-    color: var(--color-code-string);
-  }
-  .hljs-number,
-  .hljs-symbol,
-  .hljs-bullet,
-  .hljs-link {
-    color: var(--color-code-number);
-  }
-  .hljs-title,
-  .hljs-title.function_,
-  .hljs-title.class_,
-  .hljs-type,
-  .hljs-built_in,
-  .hljs-attr,
-  .hljs-attribute,
-  .hljs-selector-id,
-  .hljs-selector-class {
-    color: var(--color-code-func);
-  }
-  .hljs-punctuation,
-  .hljs-operator {
-    color: var(--color-code-punct);
-  }
-  .hljs-emphasis {
-    font-style: italic;
-  }
-  .hljs-strong {
-    font-weight: 700;
-  }
 }
