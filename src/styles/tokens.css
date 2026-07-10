@@ -34,6 +34,10 @@
   /* Focus ring */
   --color-focus: #c15f3c;
 
+  /* <mark> highlight — a yellow highlighter, constant across themes. */
+  --color-mark-bg: #fde68a;
+  --color-mark-fg: #2b2a26;
+
   /* Code block keeps its own dark theme in BOTH page themes */
   --color-code-bg: #1c1b19;
   --color-code-header-bg: #161513;
