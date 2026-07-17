@@ -33,10 +33,10 @@
     }
   }
 
-  /* Claude-like scrollbars: thin, rounded thumb, transparent track. */
+  /* Thin, rounded scrollbars with a coral (accent) thumb on a transparent track. */
   * {
     scrollbar-width: thin;
-    scrollbar-color: var(--color-border) transparent;
+    scrollbar-color: var(--color-accent) transparent;
   }
   ::-webkit-scrollbar {
     width: 11px;
@@ -46,13 +46,13 @@
     background: transparent;
   }
   ::-webkit-scrollbar-thumb {
-    background: var(--color-border);
+    background: var(--color-accent);
     border-radius: 8px;
     border: 3px solid transparent;
     background-clip: content-box;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--color-fg-faint);
+    background: var(--color-accent);
     background-clip: content-box;
   }
 }
@@ -159,9 +159,15 @@
     -webkit-box-decoration-break: clone;
   }
 
-  /* GFM tables use the UI face (Poppins) for tabular data. */
+  /**
+   * GFM tables use the UI face (Poppins). `width: max-content` lets the table
+   * grow to fit its columns (so many columns are NOT squeezed and the wrapper
+   * scrolls horizontally), while `min-width: 100%` keeps a small table filling
+   * the pane. Each cell is capped at a max width and long content wraps.
+   */
   .prose-doc table {
-    width: 100%;
+    width: max-content;
+    min-width: 100%;
     border-collapse: collapse;
     font-family: var(--font-body);
     font-size: 14px;
@@ -170,15 +176,25 @@
   .prose-doc thead tr {
     background: var(--color-surface-muted);
   }
-  .prose-doc th {
-    text-align: left;
-    padding: 10px 16px;
-    font-weight: 600;
-    border-bottom: 1px solid var(--color-border);
-  }
+  .prose-doc th,
   .prose-doc td {
     padding: 10px 16px;
     border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+  }
+  .prose-doc th {
+    text-align: left;
+    font-weight: 600;
+  }
+  /**
+   * Each cell's content is wrapped in this block (see MarkdownRenderer). A max
+   * width on the cell itself is ignored in auto table layout, so the cap lives
+   * on this inner element: content wraps once it reaches the max width, and a
+   * table with many columns grows past the pane and scrolls instead of squeezing.
+   */
+  .prose-doc .md-cell {
+    max-width: 44rem;
+    overflow-wrap: anywhere;
   }
 
   /**
@@ -187,4 +203,29 @@
    * Tailwind would tree-shake them out of the production build. It lives in
    * styles/code-theme.css (plain CSS, imported in main.tsx) instead.
    */
+}
+
+/**
+ * The table's horizontal scrollbar. Plain CSS (outside @layer) so Tailwind never
+ * tree-shakes it. A rounded, easy-to-grab bar that tints to the accent on hover.
+ */
+.md-table-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-accent) transparent;
+}
+.md-table-scroll::-webkit-scrollbar {
+  height: 10px;
+}
+.md-table-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.md-table-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-accent);
+  border-radius: 999px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+.md-table-scroll::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+  background-clip: content-box;
 }

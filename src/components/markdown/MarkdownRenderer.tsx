@@ -12,6 +12,7 @@ import { CodeBlock } from './CodeBlock'
 import { Anchor } from './Anchor'
 import { TableWrapper } from './TableWrapper'
 import { MarkdownImage } from './MarkdownImage'
+import { MermaidDiagram } from './MermaidDiagram'
 import { ImageMapContext } from './imageMapContext'
 
 /**
@@ -80,8 +81,24 @@ const components: Components = {
     />
   ),
   table: ({ children }) => <TableWrapper>{children}</TableWrapper>,
+  // Cell content is wrapped so a max width can actually cap the column (a
+  // max-width on the cell itself is ignored in auto table layout).
+  th: ({ children, node: _node, ...rest }) => (
+    <th {...rest}>
+      <div className="md-cell">{children}</div>
+    </th>
+  ),
+  td: ({ children, node: _node, ...rest }) => (
+    <td {...rest}>
+      <div className="md-cell">{children}</div>
+    </td>
+  ),
   pre: ({ node, children }) => {
     const { language, text } = readCodeMeta(node)
+    // A ```mermaid fence renders as a diagram, not a code block.
+    if (language === 'mermaid') {
+      return <MermaidDiagram code={text} />
+    }
     return (
       <CodeBlock language={language} rawText={text}>
         {children}
