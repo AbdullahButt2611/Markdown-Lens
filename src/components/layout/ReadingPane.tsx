@@ -42,7 +42,7 @@ export function ReadingPane({ file }: ReadingPaneProps) {
 
       <div className="flex-1 overflow-y-auto">
         <article className="mx-auto max-w-[960px] px-5 pb-[120px] pt-[52px] sm:px-10">
-          <MarkdownRenderer content={file.content} />
+          <MarkdownRenderer content={file.content} images={file.images} />
         </article>
       </div>
     </div>

@@ -6,6 +6,10 @@ interface DropZoneProps {
   onFiles: (files: File[]) => void
   children: ReactNode
   className?: string
+  /** File picker `accept` filter (defaults to the markdown types). */
+  accept?: string
+  /** Accessible label for the drop target. */
+  ariaLabel?: string
 }
 
 /**
@@ -13,10 +17,19 @@ interface DropZoneProps {
  * drop, and opens the file dialog on click or Enter/Space. Purely presentational
  * content is passed as children (see EmptyState).
  */
-export function DropZone({ onFiles, children, className = '' }: DropZoneProps) {
+export function DropZone({
+  onFiles,
+  children,
+  className = '',
+  accept,
+  ariaLabel = 'Drop Markdown files here, or browse',
+}: DropZoneProps) {
   const [isDragging, setIsDragging] = useState(false)
 
-  const browse = useCallback(() => openFileDialog(onFiles), [onFiles])
+  const browse = useCallback(
+    () => openFileDialog(onFiles, accept),
+    [onFiles, accept],
+  )
 
   const handleDragOver = useCallback((e: DragEvent) => {
     e.preventDefault()
@@ -52,7 +65,7 @@ export function DropZone({ onFiles, children, className = '' }: DropZoneProps) {
     <div
       role="button"
       tabIndex={0}
-      aria-label="Drop Markdown files here, or browse"
+      aria-label={ariaLabel}
       onClick={browse}
       onKeyDown={handleKeyDown}
       onDragOver={handleDragOver}

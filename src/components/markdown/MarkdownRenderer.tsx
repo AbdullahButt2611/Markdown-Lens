@@ -11,6 +11,8 @@ import { remarkMark } from '../../lib/remarkMark'
 import { CodeBlock } from './CodeBlock'
 import { Anchor } from './Anchor'
 import { TableWrapper } from './TableWrapper'
+import { MarkdownImage } from './MarkdownImage'
+import { ImageMapContext } from './imageMapContext'
 
 /**
  * The ONE place the markdown pipeline is configured (CLAUDE.md: "One pipeline").
@@ -70,6 +72,13 @@ function readCodeMeta(node: Element | undefined): {
 
 const components: Components = {
   a: Anchor,
+  img: ({ src, alt, title }) => (
+    <MarkdownImage
+      src={typeof src === 'string' ? src : undefined}
+      alt={alt}
+      title={title}
+    />
+  ),
   table: ({ children }) => <TableWrapper>{children}</TableWrapper>,
   pre: ({ node, children }) => {
     const { language, text } = readCodeMeta(node)
@@ -83,18 +92,25 @@ const components: Components = {
 
 interface MarkdownRendererProps {
   content: string
+  /** Resolved local images: markdown reference -> blob URL. */
+  images?: Record<string, string>
 }
 
-export function MarkdownRenderer({ content }: MarkdownRendererProps) {
+export function MarkdownRenderer({
+  content,
+  images = {},
+}: MarkdownRendererProps) {
   return (
     <div className="prose-doc prose max-w-none">
-      <ReactMarkdown
-        remarkPlugins={remarkPlugins}
-        rehypePlugins={rehypePlugins}
-        components={components}
-      >
-        {content}
-      </ReactMarkdown>
+      <ImageMapContext.Provider value={images}>
+        <ReactMarkdown
+          remarkPlugins={remarkPlugins}
+          rehypePlugins={rehypePlugins}
+          components={components}
+        >
+          {content}
+        </ReactMarkdown>
+      </ImageMapContext.Provider>
     </div>
   )
 }
