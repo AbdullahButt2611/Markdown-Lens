@@ -1,4 +1,12 @@
-import { Code2, Lock, Sigma, Type, Upload } from 'lucide-react'
+import {
+  Code2,
+  Image as ImageIcon,
+  Lock,
+  Sigma,
+  Type,
+  Upload,
+  Workflow,
+} from 'lucide-react'
 import type { UploadError } from '../../types/markdown'
 import type { Theme } from '../../hooks/useTheme'
 import { DropZone } from '../upload/DropZone'
@@ -18,6 +26,8 @@ const FEATURES = [
   { icon: Type, label: 'GitHub-Flavored Markdown' },
   { icon: Sigma, label: 'LaTeX Math' },
   { icon: Code2, label: 'Syntax Highlighting' },
+  { icon: ImageIcon, label: 'Images' },
+  { icon: Workflow, label: 'Mermaid Diagrams' },
 ] as const
 
 /** Full-pane invitation shown when no files are open. */
