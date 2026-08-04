@@ -10,6 +10,7 @@ import {
   Svg,
   Path,
 } from '@react-pdf/renderer'
+import type { Style } from '@react-pdf/types'
 import { PDF_COLORS as C, PDF_SIZES as S, PX_TO_PT } from './pdfTheme'
 import { highlightCode } from './highlightCode'
 import type { RasterImage } from './assets'
@@ -67,15 +68,18 @@ const styles = StyleSheet.create({
   h4: { fontFamily: READING, fontSize: S.h4, fontWeight: 700, lineHeight: 1.25, marginTop: 10, marginBottom: 4 },
   h5: { fontFamily: READING, fontSize: S.h5, fontWeight: 700, lineHeight: 1.3, marginTop: 9, marginBottom: 3 },
   h6: { fontFamily: READING, fontSize: S.h6, fontWeight: 700, lineHeight: 1.3, marginTop: 9, marginBottom: 3, color: C.muted },
-  paragraph: { marginBottom: 8 },
   bold: { fontWeight: 700 },
   italic: { fontStyle: 'italic' },
   strike: { textDecoration: 'line-through' },
   // Links: coral, no underline — matches the reading view's link treatment.
   link: { color: C.accent, fontWeight: 500, textDecoration: 'none' },
+  // react-pdf ignores border/radius/padding on inline text, so a bordered/rounded
+  // chip isn't possible; we approximate the reading view's inline code with the
+  // same tint + monospace and add horizontal padding via spaces (see renderInline).
   inlineCode: {
     fontFamily: MONO,
     fontSize: S.small,
+    fontStyle: 'normal',
     color: C.fg,
     backgroundColor: C.surfaceMuted,
   },
@@ -87,19 +91,21 @@ const styles = StyleSheet.create({
   codeBlock: {
     borderWidth: 1,
     borderColor: C.codeBorder,
-    borderRadius: 12,
+    borderRadius: 14,
     marginVertical: 10,
   },
   codeHeader: {
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: C.codeHeaderBg,
-    paddingHorizontal: 12,
+    paddingHorizontal: 13,
     paddingVertical: 7,
-    borderTopLeftRadius: 12,
-    borderTopRightRadius: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: C.codeBorder,
+    borderTopLeftRadius: 13,
+    borderTopRightRadius: 13,
   },
-  codeDot: { width: 6, height: 6, borderRadius: 3, marginRight: 4 },
+  codeDot: { width: 6, height: 6, borderRadius: 3, marginRight: 5 },
   codeLang: {
     fontFamily: UI,
     fontSize: 7,
@@ -107,16 +113,17 @@ const styles = StyleSheet.create({
     color: C.codeLabel,
     textTransform: 'uppercase',
     letterSpacing: 1,
+    fontStyle: 'normal',
     marginLeft: 6,
   },
   codeBody: {
     backgroundColor: C.codeBg,
-    paddingHorizontal: 12,
-    paddingVertical: 10,
-    borderBottomLeftRadius: 12,
-    borderBottomRightRadius: 12,
+    paddingHorizontal: 13,
+    paddingVertical: 11,
+    borderBottomLeftRadius: 13,
+    borderBottomRightRadius: 13,
   },
-  codeText: { fontFamily: MONO, fontSize: S.code, color: C.codeFg, lineHeight: 1.6 },
+  codeText: { fontFamily: MONO, fontSize: S.code, fontStyle: 'normal', color: C.codeFg, lineHeight: 1.75 },
   blockquote: {
     borderLeftWidth: 3,
     borderLeftColor: C.accent,
@@ -130,7 +137,6 @@ const styles = StyleSheet.create({
   listItemRow: { flexDirection: 'row', marginBottom: 4 },
   listMarker: { width: 16, color: C.accent },
   listItemContent: { flex: 1 },
-  listParagraph: { marginBottom: 2 },
   // GFM task-list checkbox, drawn (not a glyph) so it can't render as tofu.
   checkboxCell: { width: 16, flexDirection: 'row' },
   checkbox: {
@@ -173,11 +179,32 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: C.border,
   },
-  cellText: { fontFamily: UI, fontSize: S.small, lineHeight: 1.45 },
-  cellHeaderText: { fontFamily: UI, fontSize: S.small, fontWeight: 600, lineHeight: 1.45 },
   diagramWrap: { alignItems: 'center', marginVertical: 8 },
   imageWrap: { alignItems: 'center', marginVertical: 10 },
   image: { borderRadius: 8, borderWidth: 1, borderColor: C.border },
+  // Paragraphs render as a wrapping row of word tokens so inline code can be a
+  // real bordered/rounded chip (a View — which honors the box model that inline
+  // Text does not). Words align on the baseline with the chips.
+  // Word tokens use a tight line height so the glyph fills its box; rowGap
+  // restores readable line spacing. This lets centered chips align with the text.
+  paragraphRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', rowGap: 5 },
+  chip: {
+    // Fixed height + centering so the code text is vertically centered in the
+    // chip; marginBottom nudges the whole chip up to sit on the text line.
+    height: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: C.surfaceMuted,
+    borderWidth: 1,
+    borderColor: C.border,
+    borderRadius: 4,
+    paddingHorizontal: 4,
+    // No horizontal margin: spacing comes from the adjacent text's spaces, so a
+    // following comma/period sits tight against the chip (no gap before it).
+    marginHorizontal: 0,
+  },
+  chipText: { fontFamily: MONO, fontSize: 8.5, fontStyle: 'normal', fontWeight: 400, color: C.fg, lineHeight: 1 },
+  lineBreak: { width: '100%', height: 0 },
 })
 
 const CODE_DOTS = [C.dotRed, C.dotAmber, C.dotGreen]
@@ -209,7 +236,12 @@ function renderInline(nodes: MdNode[] | undefined): ReactNode {
       case 'delete':
         return <Text key={i} style={styles.strike}>{renderInline(n.children)}</Text>
       case 'inlineCode':
-        return <Text key={i} style={styles.inlineCode}>{n.value}</Text>
+        // Thin spaces fake the horizontal padding react-pdf won't apply inline.
+        return (
+          <Text key={i} style={styles.inlineCode}>
+            {' ' + (n.value ?? '') + ' '}
+          </Text>
+        )
       case 'mark':
         return <Text key={i} style={styles.mark}>{renderInline(n.children)}</Text>
       case 'link':
@@ -280,14 +312,130 @@ function renderCodeBlock(node: MdNode, key: number): ReactNode {
   )
 }
 
+/** The text styles the flex-word renderer composes (react-pdf's Style). */
+type WordStyle = Style
+
+const WORD_BASE: WordStyle = {
+  fontFamily: READING,
+  fontSize: S.normal,
+  color: C.fg,
+  lineHeight: 1.2,
+}
+
+/** Concatenate the plain text of inline nodes (for links and word splitting). */
+function plainText(nodes: MdNode[] | undefined): string {
+  if (!nodes) return ''
+  return nodes
+    .map((n) => (n.type === 'text' ? n.value ?? '' : plainText(n.children)))
+    .join('')
+}
+
+/** Push a text run as individual word items, preserving inter-word spacing
+ *  (including a leading space, so boundaries with chips/links keep their gap). */
+function pushWords(value: string, style: WordStyle, items: ReactNode[]): void {
+  const leading = /^\s/.test(value)
+  const trailing = /\s$/.test(value)
+  const words = value.split(/\s+/).filter(Boolean)
+  words.forEach((w, i) => {
+    // A non-breaking space for a leading boundary gap (react-pdf trims a normal
+    // leading space), so text after a chip/link keeps its space.
+    const pre = i === 0 && leading ? ' ' : ''
+    const post = i < words.length - 1 || trailing ? ' ' : ''
+    items.push(
+      <Text key={items.length} style={style}>
+        {pre + w + post}
+      </Text>,
+    )
+  })
+}
+
+/**
+ * Walk inline nodes into flex items: words become <Text>, inline code becomes a
+ * bordered <View> chip, links become per-word <Link>s (so they wrap), and a
+ * <br> becomes a full-width spacer that forces the row to wrap.
+ */
+function collectFlexItems(
+  nodes: MdNode[],
+  style: WordStyle,
+  items: ReactNode[],
+): void {
+  for (const n of nodes) {
+    switch (n.type) {
+      case 'text':
+        pushWords(n.value ?? '', style, items)
+        break
+      case 'strong':
+        collectFlexItems(n.children ?? [], { ...style, fontWeight: 700 }, items)
+        break
+      case 'emphasis':
+        collectFlexItems(n.children ?? [], { ...style, fontStyle: 'italic' }, items)
+        break
+      case 'delete':
+        collectFlexItems(n.children ?? [], { ...style, textDecoration: 'line-through' }, items)
+        break
+      case 'mark':
+        collectFlexItems(n.children ?? [], { ...style, backgroundColor: C.markBg, color: C.markFg }, items)
+        break
+      case 'inlineCode':
+        items.push(
+          <View key={items.length} style={styles.chip}>
+            <Text style={styles.chipText}>{n.value}</Text>
+          </View>,
+        )
+        break
+      case 'link': {
+        const url = n.url ?? ''
+        const linkStyle: WordStyle = { ...style, color: C.accent, fontWeight: 500, textDecoration: 'none' }
+        const value = plainText(n.children)
+        const trailing = /\s$/.test(value)
+        const words = value.split(/\s+/).filter(Boolean)
+        words.forEach((w, i) => {
+          const space = i < words.length - 1 || trailing ? ' ' : ''
+          items.push(
+            <Link key={items.length} src={url} style={linkStyle}>
+              {w + space}
+            </Link>,
+          )
+        })
+        break
+      }
+      case 'inlineMath':
+        pushWords(n.value ?? '', { ...style, fontFamily: MONO, fontSize: 8 }, items)
+        break
+      case 'break':
+        items.push(<View key={items.length} style={styles.lineBreak} />)
+        break
+      case 'image':
+        if (n.alt) pushWords(`[${n.alt}]`, { ...style, color: C.muted }, items)
+        break
+      default:
+        if (n.children) collectFlexItems(n.children, style, items)
+        break
+    }
+  }
+}
+
+/** Render a paragraph as a wrapping row of word/chip items. */
+function renderParagraphFlex(
+  nodes: MdNode[] | undefined,
+  key: number,
+  marginBottom = 8,
+): ReactNode {
+  const items: ReactNode[] = []
+  collectFlexItems(nodes ?? [], WORD_BASE, items)
+  return (
+    <View key={key} style={[styles.paragraphRow, { marginBottom }]}>
+      {items}
+    </View>
+  )
+}
+
 /** List-item body: paragraphs render tight (no block margin); nested lists and
  *  other blocks fall through to the normal block renderer. */
 function renderListItemContent(item: MdNode, assets: PdfAssets): ReactNode[] {
   return (item.children ?? []).map((child, ci) =>
     child.type === 'paragraph' ? (
-      <Text key={ci} style={styles.listParagraph}>
-        {renderInline(child.children)}
-      </Text>
+      renderParagraphFlex(child.children, ci, 2)
     ) : (
       <View key={ci}>{renderBlocks([child], assets)}</View>
     ),
@@ -347,13 +495,29 @@ function renderTable(node: MdNode, key: number): ReactNode {
     <View key={key} style={styles.table}>
       {rows.map((row, ri) => (
         <View key={ri} style={ri === 0 ? styles.tableHeaderRow : styles.tableRow} wrap={false}>
-          {(row.children ?? []).map((cell, ci) => (
-            <View key={ci} style={styles.cell}>
-              <Text style={[ri === 0 ? styles.cellHeaderText : styles.cellText, { textAlign: align[ci] ?? 'left' }]}>
-                {renderInline(cell.children)}
-              </Text>
-            </View>
-          ))}
+          {(row.children ?? []).map((cell, ci) => {
+            const base: WordStyle = {
+              fontFamily: UI,
+              fontSize: S.small,
+              color: C.fg,
+              lineHeight: 1.2,
+              fontWeight: ri === 0 ? 600 : 400,
+            }
+            const items: ReactNode[] = []
+            collectFlexItems(cell.children ?? [], base, items)
+            const a = align[ci]
+            const justifyContent =
+              a === 'center' ? 'center' : a === 'right' ? 'flex-end' : 'flex-start'
+            return (
+              <View key={ci} style={styles.cell}>
+                <View
+                  style={{ flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', justifyContent, rowGap: 4 }}
+                >
+                  {items}
+                </View>
+              </View>
+            )
+          })}
         </View>
       ))}
     </View>
@@ -375,7 +539,7 @@ function renderBlocks(nodes: MdNode[] | undefined, assets: PdfAssets): ReactNode
         if (only && only.type === 'image') {
           return renderImageBlock(only, i, assets)
         }
-        return <Text key={i} style={styles.paragraph}>{renderInline(kids)}</Text>
+        return renderParagraphFlex(kids, i)
       }
       case 'list':
         return renderList(n, i, assets)

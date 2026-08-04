@@ -2,9 +2,12 @@ import { Font } from '@react-pdf/renderer'
 import merriweatherRegular from '../../assets/fonts/Merriweather-Regular.ttf'
 import merriweatherBold from '../../assets/fonts/Merriweather-Bold.ttf'
 import merriweatherItalic from '../../assets/fonts/Merriweather-Italic.ttf'
+import merriweatherBoldItalic from '../../assets/fonts/Merriweather-BoldItalic.ttf'
 import poppinsRegular from '../../assets/fonts/Poppins-Regular.ttf'
 import poppinsMedium from '../../assets/fonts/Poppins-Medium.ttf'
 import poppinsSemiBold from '../../assets/fonts/Poppins-SemiBold.ttf'
+import poppinsItalic from '../../assets/fonts/Poppins-Italic.ttf'
+import poppinsSemiBoldItalic from '../../assets/fonts/Poppins-SemiBoldItalic.ttf'
 import jetBrainsMonoRegular from '../../assets/fonts/JetBrainsMono-Regular.ttf'
 import jetBrainsMonoBold from '../../assets/fonts/JetBrainsMono-Bold.ttf'
 
@@ -27,6 +30,7 @@ export function registerPdfFonts(): void {
       { src: merriweatherRegular, fontWeight: 400 },
       { src: merriweatherBold, fontWeight: 700 },
       { src: merriweatherItalic, fontWeight: 400, fontStyle: 'italic' },
+      { src: merriweatherBoldItalic, fontWeight: 700, fontStyle: 'italic' },
     ],
   })
   Font.register({
@@ -35,6 +39,8 @@ export function registerPdfFonts(): void {
       { src: poppinsRegular, fontWeight: 400 },
       { src: poppinsMedium, fontWeight: 500 },
       { src: poppinsSemiBold, fontWeight: 600 },
+      { src: poppinsItalic, fontWeight: 400, fontStyle: 'italic' },
+      { src: poppinsSemiBoldItalic, fontWeight: 600, fontStyle: 'italic' },
     ],
   })
   Font.register({
