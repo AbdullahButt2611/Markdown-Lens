@@ -1,0 +1,59 @@
+/**
+ * Styles for the offscreen PDF render surface (see PdfRenderSurface). This is
+ * plain CSS, imported in main.tsx and NOT inside a Tailwind @layer, so the
+ * classes below survive tree-shaking even though they never appear in JSX class
+ * strings that Tailwind scans for content.
+ *
+ * The surface is a fixed-width, forced-LIGHT copy of the document (PDFs print on
+ * white paper regardless of the on-screen theme). It re-declares the light token
+ * palette locally so it stays light even when `.dark` is set on <html>.
+ */
+
+.pdf-surface {
+  /* A4 content width in px; generatePdf maps this to the page's content box. */
+  width: 740px;
+  padding: 8px 0;
+  background: #ffffff;
+
+  /* Force the light palette regardless of the active theme. Values mirror the
+     :root light tokens in tokens.css. Code tokens are constant, so omitted. */
+  --color-bg: #faf9f5;
+  --color-sidebar: #f2f0e8;
+  --color-surface: #ffffff;
+  --color-surface-muted: #edeae0;
+  --color-fg: #2b2a26;
+  --color-fg-muted: #6b6a63;
+  --color-fg-faint: #93918a;
+  --color-border: #e7e4da;
+  --color-accent: #c15f3c;
+  --color-accent-fg: #ffffff;
+  --color-accent-soft: rgba(193, 95, 60, 0.1);
+
+  color: var(--color-fg);
+}
+
+/* Interactive chrome (code copy button, diagram zoom toolbar) has no place in a
+   PDF — hide it during capture without affecting the on-screen views. */
+.pdf-surface .pdf-hide {
+  display: none !important;
+}
+
+/* Long code lines wrap instead of scrolling, so nothing is clipped off-page and
+   code blocks stay whole and readable within the page width. */
+.pdf-surface pre {
+  white-space: pre-wrap !important;
+  word-break: break-word;
+  overflow: visible !important;
+}
+
+/* Tables fit the page width (cells wrap) rather than scrolling off-page. */
+.pdf-surface .md-table-scroll {
+  overflow: visible !important;
+}
+.pdf-surface table {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+.pdf-surface .md-cell {
+  max-width: none !important;
+}

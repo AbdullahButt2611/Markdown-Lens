@@ -1,10 +1,15 @@
 import { File, Lock } from 'lucide-react'
 import type { MarkdownFile } from '../../types/markdown'
+import type { PdfExportStatus } from '../../hooks/usePdfExport'
 import { readingTime } from '../../lib/readingTime'
 import { MarkdownRenderer } from '../markdown/MarkdownRenderer'
+import { ExportPdfButton } from '../ui/ExportPdfButton'
 
 interface ReadingPaneProps {
   file: MarkdownFile
+  pdfStatus: PdfExportStatus
+  pdfBusy: boolean
+  onExport: () => void
 }
 
 /**
@@ -12,7 +17,12 @@ interface ReadingPaneProps {
  * and reasserts the in-memory guarantee; below it the document scrolls. The
  * header is desktop-only: on mobile the MobileBar already carries the file name.
  */
-export function ReadingPane({ file }: ReadingPaneProps) {
+export function ReadingPane({
+  file,
+  pdfStatus,
+  pdfBusy,
+  onExport,
+}: ReadingPaneProps) {
   return (
     <div className="flex h-full flex-col">
       <header
@@ -38,6 +48,11 @@ export function ReadingPane({ file }: ReadingPaneProps) {
         <span className="text-[11.5px] text-[color:var(--color-fg-faint)]">
           {readingTime(file.content)}
         </span>
+        <ExportPdfButton
+          status={pdfStatus}
+          disabled={pdfBusy}
+          onClick={onExport}
+        />
       </header>
 
       <div className="flex-1 overflow-y-auto">

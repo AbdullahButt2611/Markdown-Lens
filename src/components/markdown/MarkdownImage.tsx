@@ -45,7 +45,7 @@ export function MarkdownImage({ src, alt, title }: MarkdownImageProps) {
       alt={alt ?? ''}
       title={title}
       loading="lazy"
-      className="mx-auto my-6 block h-auto max-w-full rounded-lg border border-[color:var(--color-border)]"
+      className="pdf-atomic mx-auto my-6 block h-auto max-w-full rounded-lg border border-[color:var(--color-border)]"
     />
   )
 }

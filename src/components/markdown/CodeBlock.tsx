@@ -23,7 +23,7 @@ export function CodeBlock({ language, rawText, children }: CodeBlockProps) {
   const { copied, copy } = useClipboard()
 
   return (
-    <div className="not-prose my-6 overflow-hidden rounded-[14px] border border-[color:var(--color-code-border)] shadow-lg">
+    <div className="pdf-atomic not-prose my-6 overflow-hidden rounded-[14px] border border-[color:var(--color-code-border)] shadow-lg">
       <div className="flex items-center justify-between border-b border-[color:var(--color-code-border)] bg-[color:var(--color-code-header-bg)] px-[14px] py-[9px]">
         <div className="flex items-center gap-[9px]">
           <span className="flex gap-1.5" aria-hidden="true">
@@ -39,7 +39,7 @@ export function CodeBlock({ language, rawText, children }: CodeBlockProps) {
           type="button"
           onClick={() => void copy(rawText)}
           aria-label={copied ? 'Copied' : 'Copy code'}
-          className="inline-flex items-center gap-1.5 rounded-[7px] px-[9px] py-1 font-sans text-[11.5px] font-medium text-[color:var(--color-code-fg)] transition-colors hover:bg-white/[0.08]"
+          className="pdf-hide inline-flex items-center gap-1.5 rounded-[7px] px-[9px] py-1 font-sans text-[11.5px] font-medium text-[color:var(--color-code-fg)] transition-colors hover:bg-white/[0.08]"
         >
           {copied ? (
             <>

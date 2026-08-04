@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import type { ImageRef, MarkdownFile } from './types/markdown'
 import { useFileUpload } from './hooks/useFileUpload'
 import { useTheme } from './hooks/useTheme'
+import { usePdfExport } from './hooks/usePdfExport'
 import { appendFiles } from './lib/file'
 import { scanImageReferences } from './lib/images'
 import { createId } from './lib/ids'
@@ -11,6 +12,7 @@ import { MobileBar } from './components/layout/MobileBar'
 import { ReadingPane } from './components/layout/ReadingPane'
 import { UploadErrors } from './components/upload/UploadErrors'
 import { ImageUploadModal } from './components/upload/ImageUploadModal'
+import { PdfRenderSurface } from './components/pdf/PdfRenderSurface'
 
 /** A parsed file waiting for the user to supply its referenced images. */
 interface PendingImageFile {
@@ -28,6 +30,14 @@ function App() {
   const [imageQueue, setImageQueue] = useState<PendingImageFile[]>([])
   const { errors, dismissError, readFiles } = useFileUpload()
   const { theme, toggleTheme } = useTheme()
+  const {
+    status: pdfStatus,
+    pdfFile,
+    isBusy: pdfBusy,
+    start: startPdfExport,
+    handleReady: handlePdfReady,
+    handleError: handlePdfError,
+  } = usePdfExport()
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), [])
 
@@ -178,6 +188,10 @@ function App() {
           onOpenSidebar={() => setSidebarOpen(true)}
           theme={theme}
           onToggleTheme={toggleTheme}
+          pdfStatus={pdfStatus}
+          pdfBusy={pdfBusy}
+          canExport={!!activeFile}
+          onExport={() => activeFile && startPdfExport(activeFile)}
         />
         <main className="relative min-h-0 flex-1">
           {errors.length > 0 && (
@@ -188,7 +202,12 @@ function App() {
             />
           )}
           {activeFile ? (
-            <ReadingPane file={activeFile} />
+            <ReadingPane
+              file={activeFile}
+              pdfStatus={pdfStatus}
+              pdfBusy={pdfBusy}
+              onExport={() => startPdfExport(activeFile)}
+            />
           ) : (
             <div className="flex flex-1 items-center justify-center py-24 text-[color:var(--color-fg-muted)]">
               Select A File To Read.
@@ -198,6 +217,17 @@ function App() {
       </div>
 
       {imageModal}
+
+      {/* Offscreen surface that renders the document for PDF capture. Mounted
+          only while an export is in flight; nothing here is shown to the user. */}
+      {pdfFile && (
+        <PdfRenderSurface
+          key={pdfFile.id}
+          file={pdfFile}
+          onReady={handlePdfReady}
+          onError={handlePdfError}
+        />
+      )}
     </div>
   )
 }
