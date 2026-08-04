@@ -8,7 +8,7 @@ import { remarkMark } from '../remarkMark'
 import type { MarkdownFile } from '../../types/markdown'
 import { MarkdownDocument, type MdNode, type PdfAssets } from './MarkdownDocument'
 import { renderDiagram, resolveImage, type RasterImage } from './assets'
-import { stampPageNumbers } from './stampFooter'
+import { stampFooter } from './stampFooter'
 import { registerPdfFonts } from './registerFonts'
 
 /**
@@ -73,9 +73,10 @@ export async function generatePdf(file: MarkdownFile): Promise<Blob> {
     <MarkdownDocument tree={tree} title={file.name} assets={assets} />,
   ).toBlob()
 
-  // Add the page-number footer to every page. Copy into a fresh ArrayBuffer so
-  // the bytes are a plain BlobPart regardless of pdf-lib's typed-array backing.
-  const stamped = await stampPageNumbers(await blob.arrayBuffer())
+  // Add the footer (logo + name left, page number right) to every page. Copy
+  // into a fresh ArrayBuffer so the bytes are a plain BlobPart regardless of
+  // pdf-lib's typed-array backing.
+  const stamped = await stampFooter(await blob.arrayBuffer())
   const bytes = new Uint8Array(stamped.byteLength)
   bytes.set(stamped)
   return new Blob([bytes], { type: 'application/pdf' })
