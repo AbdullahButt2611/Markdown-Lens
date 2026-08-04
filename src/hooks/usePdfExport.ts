@@ -1,26 +1,15 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { MarkdownFile } from '../types/markdown'
 
-export type PdfExportStatus =
-  | 'idle'
-  | 'preparing'
-  | 'generating'
-  | 'done'
-  | 'error'
+export type PdfExportStatus = 'idle' | 'generating' | 'done' | 'error'
 
 interface UsePdfExport {
   /** Current phase, for button feedback. */
   status: PdfExportStatus
-  /** The file being rendered offscreen right now (mount the surface for it). */
-  pdfFile: MarkdownFile | null
   /** True while an export is in flight; callers should disable the trigger. */
   isBusy: boolean
-  /** Begin exporting a file (ignored if one is already in flight). */
+  /** Generate and download a PDF for the file (ignored if one is in flight). */
   start: (file: MarkdownFile) => void
-  /** The surface finished rendering — capture and download. */
-  handleReady: (surface: HTMLElement) => void
-  /** The surface failed to settle. */
-  handleError: (error: unknown) => void
 }
 
 /** Turn a document name into a sensible `.pdf` download name. */
@@ -41,15 +30,13 @@ function downloadBlob(blob: Blob, fileName: string): void {
 }
 
 /**
- * Owns the PDF-export lifecycle. Rendering the document to a PDF happens against
- * an offscreen surface the caller mounts for `pdfFile`; when that surface reports
- * ready, this hook captures it, triggers the download, and tears the surface
- * down. Everything stays in the browser — nothing is uploaded or persisted.
+ * Owns the PDF-export lifecycle. Building the PDF (parse → rasterize assets →
+ * render vector document) runs entirely in the browser; the resulting Blob is
+ * downloaded and never uploaded or persisted.
  */
 export function usePdfExport(): UsePdfExport {
   const [status, setStatus] = useState<PdfExportStatus>('idle')
-  const [pdfFile, setPdfFile] = useState<MarkdownFile | null>(null)
-  const activeFile = useRef<MarkdownFile | null>(null)
+  const busy = useRef(false)
   const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
@@ -59,31 +46,22 @@ export function usePdfExport(): UsePdfExport {
   }, [])
 
   const finish = useCallback((next: PdfExportStatus) => {
+    busy.current = false
     setStatus(next)
-    setPdfFile(null)
-    activeFile.current = null
     if (resetTimer.current) clearTimeout(resetTimer.current)
     resetTimer.current = setTimeout(() => setStatus('idle'), 2200)
   }, [])
 
-  const start = useCallback((file: MarkdownFile) => {
-    // Ignore re-entrancy: one export at a time.
-    if (activeFile.current) return
-    if (resetTimer.current) clearTimeout(resetTimer.current)
-    activeFile.current = file
-    setStatus('preparing')
-    setPdfFile(file)
-  }, [])
-
-  const handleReady = useCallback(
-    (surface: HTMLElement) => {
-      const file = activeFile.current
-      if (!file) return
+  const start = useCallback(
+    (file: MarkdownFile) => {
+      if (busy.current) return
+      busy.current = true
+      if (resetTimer.current) clearTimeout(resetTimer.current)
       setStatus('generating')
-      // Lazy-loaded so jsPDF + html2canvas stay out of the initial bundle and
-      // only load when the reader actually exports (cf. the lazy mermaid import).
+      // Lazy-loaded so @react-pdf/renderer stays out of the initial bundle and
+      // only loads when the reader actually exports.
       void import('../lib/pdf/generatePdf')
-        .then(({ generatePdf }) => generatePdf(surface, file.name))
+        .then(({ generatePdf }) => generatePdf(file))
         .then((blob) => {
           downloadBlob(blob, toPdfName(file.name))
           finish('done')
@@ -93,14 +71,5 @@ export function usePdfExport(): UsePdfExport {
     [finish],
   )
 
-  const handleError = useCallback(() => finish('error'), [finish])
-
-  return {
-    status,
-    pdfFile,
-    isBusy: status === 'preparing' || status === 'generating',
-    start,
-    handleReady,
-    handleError,
-  }
+  return { status, isBusy: status === 'generating', start }
 }

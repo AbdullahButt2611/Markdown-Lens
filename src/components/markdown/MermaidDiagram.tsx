@@ -153,10 +153,7 @@ export function MermaidDiagram({ code }: MermaidDiagramProps) {
 
   if (failed) {
     return (
-      <div
-        data-mermaid-state="failed"
-        className="pdf-atomic not-prose my-6 overflow-hidden rounded-xl border border-[color:var(--color-border)]"
-      >
+      <div className="not-prose my-6 overflow-hidden rounded-xl border border-[color:var(--color-border)]">
         <div className="border-b border-[color:var(--color-border)] bg-[color:var(--color-surface-muted)] px-4 py-2 text-xs font-medium text-[color:var(--color-fg-muted)]">
           Diagram Could Not Be Rendered
         </div>
@@ -169,22 +166,16 @@ export function MermaidDiagram({ code }: MermaidDiagramProps) {
 
   if (!svg) {
     return (
-      <div
-        data-mermaid-state="rendering"
-        className="pdf-atomic not-prose my-6 grid min-h-[120px] place-items-center rounded-xl border border-[color:var(--color-border)] bg-[color:var(--color-surface)] text-sm text-[color:var(--color-fg-faint)]"
-      >
+      <div className="not-prose my-6 grid min-h-[120px] place-items-center rounded-xl border border-[color:var(--color-border)] bg-[color:var(--color-surface)] text-sm text-[color:var(--color-fg-faint)]">
         Rendering Diagram
       </div>
     )
   }
 
   return (
-    <div
-      data-mermaid-state="done"
-      className="pdf-atomic not-prose group relative my-6 overflow-hidden rounded-xl border border-[color:var(--color-border)] bg-[color:var(--color-surface)]"
-    >
+    <div className="not-prose group relative my-6 overflow-hidden rounded-xl border border-[color:var(--color-border)] bg-[color:var(--color-surface)]">
       {/* Zoom toolbar */}
-      <div className="pdf-hide absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-0.5 shadow-sm">
+      <div className="absolute right-2 top-2 z-10 flex items-center gap-0.5 rounded-lg border border-[color:var(--color-border)] bg-[color:var(--color-surface)] p-0.5 shadow-sm">
         <IconButton
           aria-label="Zoom out"
           onClick={zoomOut}

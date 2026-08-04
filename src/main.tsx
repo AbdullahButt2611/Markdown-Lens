@@ -9,7 +9,6 @@ import './styles/fonts.css'
 import 'katex/dist/katex.min.css'
 import './styles/code-theme.css'
 import './styles/index.css'
-import './styles/pdf.css'
 
 const rootElement = document.getElementById('root')
 if (!rootElement) {

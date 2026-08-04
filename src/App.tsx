@@ -12,7 +12,6 @@ import { MobileBar } from './components/layout/MobileBar'
 import { ReadingPane } from './components/layout/ReadingPane'
 import { UploadErrors } from './components/upload/UploadErrors'
 import { ImageUploadModal } from './components/upload/ImageUploadModal'
-import { PdfRenderSurface } from './components/pdf/PdfRenderSurface'
 
 /** A parsed file waiting for the user to supply its referenced images. */
 interface PendingImageFile {
@@ -32,11 +31,8 @@ function App() {
   const { theme, toggleTheme } = useTheme()
   const {
     status: pdfStatus,
-    pdfFile,
     isBusy: pdfBusy,
     start: startPdfExport,
-    handleReady: handlePdfReady,
-    handleError: handlePdfError,
   } = usePdfExport()
 
   const closeSidebar = useCallback(() => setSidebarOpen(false), [])
@@ -217,17 +213,6 @@ function App() {
       </div>
 
       {imageModal}
-
-      {/* Offscreen surface that renders the document for PDF capture. Mounted
-          only while an export is in flight; nothing here is shown to the user. */}
-      {pdfFile && (
-        <PdfRenderSurface
-          key={pdfFile.id}
-          file={pdfFile}
-          onReady={handlePdfReady}
-          onError={handlePdfError}
-        />
-      )}
     </div>
   )
 }

@@ -26,12 +26,10 @@ export function ExportPdfButton({
   onClick,
   className = '',
 }: ExportPdfButtonProps) {
-  const busy = status === 'preparing' || status === 'generating'
+  const busy = status === 'generating'
 
   const content = (() => {
     switch (status) {
-      case 'preparing':
-        return { icon: <Loader2 size={14} className="animate-spin" aria-hidden="true" />, label: 'Preparing' }
       case 'generating':
         return { icon: <Loader2 size={14} className="animate-spin" aria-hidden="true" />, label: 'Generating' }
       case 'done':
