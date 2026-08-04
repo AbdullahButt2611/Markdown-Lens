@@ -19,16 +19,25 @@ function isAbsolute(src: string): boolean {
 
 /** Rasterize a self-contained SVG string to a PNG data URL at 2x. */
 async function svgToPng(svg: string): Promise<RasterImage> {
-  const parsed = new DOMParser().parseFromString(svg, 'image/svg+xml')
+  // Mermaid can emit an HTML <br> (not valid XML); self-close it so the SVG
+  // still loads as an image.
+  const clean = svg.replace(/<br\s*>/gi, '<br/>')
+  const parsed = new DOMParser().parseFromString(clean, 'image/svg+xml')
   const el = parsed.documentElement
-  let w = parseFloat(el.getAttribute('width') ?? '')
-  let h = parseFloat(el.getAttribute('height') ?? '')
+
+  // Prefer the viewBox for intrinsic size — mermaid sets width/height to "100%".
+  let w = 0
+  let h = 0
+  const vb = (el.getAttribute('viewBox') ?? '').split(/[\s,]+/).map(Number)
+  if (vb.length === 4) {
+    w = vb[2] ?? 0
+    h = vb[3] ?? 0
+  }
   if (!w || !h) {
-    const vb = (el.getAttribute('viewBox') ?? '').split(/[\s,]+/).map(Number)
-    if (vb.length === 4) {
-      w = vb[2] ?? 0
-      h = vb[3] ?? 0
-    }
+    const rawW = el.getAttribute('width') ?? ''
+    const rawH = el.getAttribute('height') ?? ''
+    if (!rawW.includes('%')) w = parseFloat(rawW) || w
+    if (!rawH.includes('%')) h = parseFloat(rawH) || h
   }
   w = w || 600
   h = h || 400
@@ -62,30 +71,42 @@ async function svgToPng(svg: string): Promise<RasterImage> {
  * null on failure so the caller can fall back to the raw source.
  */
 export async function renderDiagram(code: string): Promise<RasterImage | null> {
-  try {
-    const mermaid = (await import('mermaid')).default
-    mermaid.initialize({
-      startOnLoad: false,
-      securityLevel: 'strict',
-      theme: 'base',
-      fontFamily: 'Helvetica, Arial, sans-serif',
-      themeVariables: {
-        background: '#ffffff',
-        primaryColor: '#edeae0',
-        primaryBorderColor: '#c15f3c',
-        primaryTextColor: '#2b2a26',
-        secondaryColor: '#faf9f5',
-        tertiaryColor: '#faf9f5',
-        lineColor: '#6b6a63',
-        textColor: '#2b2a26',
-        fontSize: '14px',
-      },
-    })
-    const { svg } = await mermaid.render(`pdf-mermaid-${createId()}`, code)
-    return await svgToPng(svg)
-  } catch {
-    return null
+  const mermaid = (await import('mermaid')).default
+
+  // Retry a few times: mermaid keeps global state, so a render can be corrupted
+  // by a concurrent (on-screen) render. A fresh attempt reliably recovers.
+  for (let attempt = 0; attempt < 3; attempt += 1) {
+    try {
+      mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: 'strict',
+        theme: 'base',
+        // Render labels as pure SVG <text> (not HTML in <foreignObject>). Labels
+        // with <br> otherwise produce a foreignObject that fails to rasterize
+        // when the SVG is loaded as an image (diagram falls back to raw code).
+        htmlLabels: false,
+        flowchart: { htmlLabels: false },
+        class: { htmlLabels: false },
+        fontFamily: 'Helvetica, Arial, sans-serif',
+        themeVariables: {
+          background: '#ffffff',
+          primaryColor: '#edeae0',
+          primaryBorderColor: '#c15f3c',
+          primaryTextColor: '#2b2a26',
+          secondaryColor: '#faf9f5',
+          tertiaryColor: '#faf9f5',
+          lineColor: '#6b6a63',
+          textColor: '#2b2a26',
+          fontSize: '14px',
+        },
+      })
+      const { svg } = await mermaid.render(`pdf-mermaid-${createId()}`, code)
+      return await svgToPng(svg)
+    } catch {
+      // Transient failure — try again.
+    }
   }
+  return null
 }
 
 /**
