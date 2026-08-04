@@ -192,21 +192,21 @@ const styles = StyleSheet.create({
   // restores readable line spacing. This lets centered chips align with the text.
   paragraphRow: { flexDirection: 'row', flexWrap: 'wrap', alignItems: 'center', rowGap: 5 },
   chip: {
-    // Fixed height + centering so the code text is vertically centered in the
-    // chip; marginBottom nudges the whole chip up to sit on the text line.
-    height: 12,
+    // Fixed height + flex centering; the text is nudged up (chipText marginBottom)
+    // to counter the mono font's low baseline so it sits truly centered.
+    height: 13,
     alignItems: 'center',
     justifyContent: 'center',
+    paddingHorizontal: 4,
     backgroundColor: C.surfaceMuted,
     borderWidth: 1,
     borderColor: C.border,
     borderRadius: 4,
-    paddingHorizontal: 4,
     // No horizontal margin: spacing comes from the adjacent text's spaces, so a
     // following comma/period sits tight against the chip (no gap before it).
     marginHorizontal: 0,
   },
-  chipText: { fontFamily: MONO, fontSize: 8.5, fontStyle: 'normal', fontWeight: 400, color: C.fg, lineHeight: 1 },
+  chipText: { fontFamily: MONO, fontSize: 8.5, fontStyle: 'normal', fontWeight: 400, color: C.fg, lineHeight: 1, marginBottom: 2.4 },
   lineBreak: { width: '100%', height: 0 },
 })
 
