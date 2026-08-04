@@ -5,6 +5,8 @@ export interface RasterImage {
   dataUrl: string
   width: number
   height: number
+  /** True for SVGs — vector, so they can fill the column crisply at any size. */
+  vector?: boolean
 }
 
 /** Absolute URL, protocol-relative, or an already-inlined data/blob URL. */
@@ -109,11 +111,41 @@ export async function renderDiagram(code: string): Promise<RasterImage | null> {
   return null
 }
 
+/** Whether a reference points at an SVG (which react-pdf's <Image> can't draw). */
+function isSvgSource(resolved: string, src: string): boolean {
+  return /^data:image\/svg/i.test(resolved) || /\.svgz?($|[?#])/i.test(src)
+}
+
+/** Best-effort intrinsic size of an SVG data URL, from its viewBox or width/height. */
+function svgSizeFromDataUrl(resolved: string): { w: number; h: number } {
+  try {
+    if (!/^data:image\/svg/i.test(resolved)) return { w: 0, h: 0 }
+    const comma = resolved.indexOf(',')
+    const header = resolved.slice(0, comma)
+    const raw = resolved.slice(comma + 1)
+    const body = /;base64/i.test(header) ? atob(raw) : decodeURIComponent(raw)
+    const vb = body.match(
+      /viewBox\s*=\s*"[\d.eE+-]+[\s,]+[\d.eE+-]+[\s,]+([\d.eE+]+)[\s,]+([\d.eE+]+)"/i,
+    )
+    if (vb) return { w: parseFloat(vb[1] ?? '0'), h: parseFloat(vb[2] ?? '0') }
+    const wm = body.match(/\bwidth\s*=\s*"([\d.]+)/i)
+    const hm = body.match(/\bheight\s*=\s*"([\d.]+)/i)
+    if (wm && hm) return { w: parseFloat(wm[1] ?? '0'), h: parseFloat(hm[1] ?? '0') }
+  } catch {
+    /* fall through */
+  }
+  return { w: 0, h: 0 }
+}
+
+// Cap the rasterized resolution so embedded images don't bloat the PDF; this is
+// still far above the on-page display size.
+const MAX_RASTER_WIDTH = 1600
+
 /**
- * Resolve a markdown image reference to embeddable image bytes. Local references
- * (blob URLs the user supplied) and data URLs are inlined via canvas; absolute
- * http(s) images are best-effort (canvas taint falls back to the raw URL). The
- * intrinsic size is always read so the image can be scaled to fit the page.
+ * Resolve a markdown image reference to embeddable PNG bytes. Every image is
+ * rasterized through a canvas so it works with react-pdf's <Image> — crucially
+ * this makes SVGs render (they'd otherwise be blank) by drawing them at 2x. The
+ * intrinsic size is returned so the image can be scaled to fit the page.
  */
 export async function resolveImage(
   src: string,
@@ -121,6 +153,7 @@ export async function resolveImage(
 ): Promise<RasterImage | null> {
   const resolved = images[src] ?? (isAbsolute(src) ? src : null)
   if (!resolved) return null
+  const svg = isSvgSource(resolved, src)
   try {
     const img = new Image()
     img.crossOrigin = 'anonymous'
@@ -129,24 +162,35 @@ export async function resolveImage(
       img.onerror = reject
       img.src = resolved
     })
-    const width = img.naturalWidth || 1
-    const height = img.naturalHeight || 1
 
-    if (resolved.startsWith('data:')) {
-      return { dataUrl: resolved, width, height }
+    let width = img.naturalWidth || 0
+    let height = img.naturalHeight || 0
+    if (svg && (!width || !height)) {
+      const box = svgSizeFromDataUrl(resolved)
+      width = box.w
+      height = box.h
     }
+    width = width || 800
+    height = height || 600
 
+    // Rasterize: SVGs at a high resolution so they stay crisp when scaled up to
+    // the full column width; raster images at native size, capped so very large
+    // photos don't bloat the file.
+    const targetW = svg
+      ? Math.min(2400, Math.max(width * 3, 1400))
+      : Math.min(width, MAX_RASTER_WIDTH)
+    const targetH = Math.round(targetW * (height / width))
     const canvas = document.createElement('canvas')
-    canvas.width = width
-    canvas.height = height
+    canvas.width = Math.max(1, Math.round(targetW))
+    canvas.height = Math.max(1, targetH)
     const ctx = canvas.getContext('2d')
-    if (!ctx) return { dataUrl: resolved, width, height }
-    ctx.drawImage(img, 0, 0)
+    if (!ctx) return { dataUrl: resolved, width, height, vector: svg }
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
     try {
-      return { dataUrl: canvas.toDataURL('image/png'), width, height }
+      return { dataUrl: canvas.toDataURL('image/png'), width, height, vector: svg }
     } catch {
       // Cross-origin taint: hand the URL to react-pdf to fetch itself.
-      return { dataUrl: resolved, width, height }
+      return { dataUrl: resolved, width, height, vector: svg }
     }
   } catch {
     return null

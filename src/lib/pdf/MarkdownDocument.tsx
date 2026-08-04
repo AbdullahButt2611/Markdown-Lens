@@ -45,6 +45,9 @@ export interface PdfAssets {
 // A4 minus horizontal padding — the usable content width in points.
 const PAGE_PADDING_X = 46
 const CONTENT_WIDTH = 595.28 - PAGE_PADDING_X * 2
+// Usable height for a single image (A4 height minus top/bottom padding, with a
+// little breathing room) so a tall image doesn't fill the whole page.
+const IMAGE_MAX_HEIGHT = (841.89 - 42 - 48) * 0.92
 
 // Reading face (Merriweather) for the document body, Poppins for UI chrome
 // (tables, code header), JetBrains Mono for code — same roles as on screen.
@@ -211,13 +214,22 @@ const CODE_DOTS = [C.dotRed, C.dotAmber, C.dotGreen]
 
 const HEADINGS = [styles.h1, styles.h2, styles.h3, styles.h4, styles.h5, styles.h6]
 
-/** Scale an image's intrinsic pixel size to points, capped at the page width. */
+/**
+ * Size an image for the page, always preserving its aspect ratio:
+ *  - SVGs are vector, so they scale up to fill the column crisply.
+ *  - Raster images fill the column too, but are enlarged at most 1.5x their
+ *    natural size so they never look blurry (larger images scale down to fit).
+ *  - The height is finally capped to the page so tall images don't overflow.
+ */
 function fit(img: RasterImage): { width: number; height: number } {
-  let width = img.width * PX_TO_PT
-  let height = img.height * PX_TO_PT
-  if (width > CONTENT_WIDTH) {
-    height *= CONTENT_WIDTH / width
-    width = CONTENT_WIDTH
+  const ratio = img.width > 0 ? img.height / img.width : 0.6
+  const naturalWidth = img.width * PX_TO_PT
+  const maxScaleUp = img.vector ? 6 : 1.5
+  let width = Math.min(CONTENT_WIDTH, naturalWidth * maxScaleUp)
+  let height = width * ratio
+  if (height > IMAGE_MAX_HEIGHT) {
+    height = IMAGE_MAX_HEIGHT
+    width = height / ratio
   }
   return { width, height }
 }
