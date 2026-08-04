@@ -207,6 +207,18 @@ const styles = StyleSheet.create({
     marginHorizontal: 0,
   },
   chipText: { fontFamily: MONO, fontSize: 8.5, fontStyle: 'normal', fontWeight: 400, color: C.fg, lineHeight: 1, marginBottom: 2.4 },
+  // Each marked word (and any inline-code chip) is a small rounded, padded yellow
+  // pill; adjacent pills touch to form a continuous per-line highlight (rounded
+  // ends, gaps between wrapped lines) — approximating box-decoration-break: clone.
+  markPill: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: C.markBg,
+    borderRadius: 3,
+    paddingHorizontal: 3,
+    paddingVertical: 1,
+    marginRight: -3,
+  },
   lineBreak: { width: '100%', height: 0 },
 })
 
@@ -361,6 +373,20 @@ function pushWords(value: string, style: WordStyle, items: ReactNode[]): void {
   })
 }
 
+/** Like pushWords, but each word is a rounded, padded yellow pill (for <mark>);
+ *  the pill's horizontal padding supplies the inter-word space, so touching
+ *  pills read as one continuous highlight. */
+function pushMarkWords(value: string, style: WordStyle, items: ReactNode[]): void {
+  const words = value.split(/\s+/).filter(Boolean)
+  words.forEach((w) => {
+    items.push(
+      <View key={items.length} style={styles.markPill}>
+        <Text style={style}>{w}</Text>
+      </View>,
+    )
+  })
+}
+
 /**
  * Walk inline nodes into flex items: words become <Text>, inline code becomes a
  * bordered <View> chip, links become per-word <Link>s (so they wrap), and a
@@ -370,31 +396,43 @@ function collectFlexItems(
   nodes: MdNode[],
   style: WordStyle,
   items: ReactNode[],
+  inMark = false,
 ): void {
   for (const n of nodes) {
     switch (n.type) {
       case 'text':
-        pushWords(n.value ?? '', style, items)
+        if (inMark) pushMarkWords(n.value ?? '', style, items)
+        else pushWords(n.value ?? '', style, items)
         break
       case 'strong':
-        collectFlexItems(n.children ?? [], { ...style, fontWeight: 700 }, items)
+        collectFlexItems(n.children ?? [], { ...style, fontWeight: 700 }, items, inMark)
         break
       case 'emphasis':
-        collectFlexItems(n.children ?? [], { ...style, fontStyle: 'italic' }, items)
+        collectFlexItems(n.children ?? [], { ...style, fontStyle: 'italic' }, items, inMark)
         break
       case 'delete':
-        collectFlexItems(n.children ?? [], { ...style, textDecoration: 'line-through' }, items)
+        collectFlexItems(n.children ?? [], { ...style, textDecoration: 'line-through' }, items, inMark)
         break
       case 'mark':
-        collectFlexItems(n.children ?? [], { ...style, backgroundColor: C.markBg, color: C.markFg }, items)
+        // Each marked word becomes a rounded yellow pill (see pushMarkWords), so
+        // the highlight follows the text per line with rounded ends and padding —
+        // approximating the reading view's box-decoration-break: clone. Code
+        // chips inside get the same rounded yellow wrapper.
+        collectFlexItems(n.children ?? [], { ...style, color: C.markFg }, items, true)
         break
-      case 'inlineCode':
+      case 'inlineCode': {
+        const chipInner = <Text style={styles.chipText}>{n.value}</Text>
         items.push(
-          <View key={items.length} style={styles.chip}>
-            <Text style={styles.chipText}>{n.value}</Text>
-          </View>,
+          inMark ? (
+            <View key={items.length} style={styles.markPill}>
+              <View style={styles.chip}>{chipInner}</View>
+            </View>
+          ) : (
+            <View key={items.length} style={styles.chip}>{chipInner}</View>
+          ),
         )
         break
+      }
       case 'link': {
         const url = n.url ?? ''
         const linkStyle: WordStyle = { ...style, color: C.accent, fontWeight: 500, textDecoration: 'none' }
@@ -421,7 +459,7 @@ function collectFlexItems(
         if (n.alt) pushWords(`[${n.alt}]`, { ...style, color: C.muted }, items)
         break
       default:
-        if (n.children) collectFlexItems(n.children, style, items)
+        if (n.children) collectFlexItems(n.children, style, items, inMark)
         break
     }
   }
